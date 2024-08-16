@@ -1,5 +1,6 @@
-const TelegramBot = require('node-telegram-bot-api');
-const stt = require('./model/stt');
+import TelegramBot from 'node-telegram-bot-api';
+import stt from './model/stt.cjs';
+import { handleEmergency } from './model/genai.js';
 
 // Replace with your own Telegram bot token
 const token = '7243620292:AAFb8L_bsQLPCOR1WM_c3rfaKJ2Gy6L6v9U';
@@ -9,10 +10,16 @@ const bot = new TelegramBot(token, { polling: true });
 
 const sendWelcomeMessage = (chatId, userName) => {
     const welcomeMessage = `Welcome, ${userName}! This is the Emergency Service Dispatch Bot. 
-    If you need assistance, please provide your location and the nature of your emergency, 
-    and we will dispatch help immediately.`;
+    Please share your location so we can assist you.`;
     
-    bot.sendMessage(chatId, welcomeMessage);
+    const options = {
+        reply_markup: {
+            keyboard: [[{ text: 'Send Location', request_location: true }]],
+            one_time_keyboard: true
+        }
+    };
+    
+    bot.sendMessage(chatId, welcomeMessage, options);
 };
 
 bot.onText(/\/start/, (msg) => {
@@ -36,6 +43,7 @@ bot.on('voice', async (msg) => {
         const url = `https://api.telegram.org/file/bot${token}/${filePath}`;
        
         const text = await stt(url);
+        await handleEmergency(text);
 
         // Respond to the user
         bot.sendMessage(chatId, 'Voice note received. Our team is reviewing your emergency.');
@@ -48,10 +56,20 @@ bot.on('voice', async (msg) => {
     }
 });
 
+
+bot.on('location', async (msg) => {
+    const chatId = msg.chat.id;
+    const { latitude, longitude } = msg.location;
+
+    // Handle the location data
+    console.log(`Received location: Latitude ${latitude}, Longitude ${longitude}`);
+
+    bot.sendMessage(chatId, 'Location received. Our team is on the way to assist you.');
+});
+
 bot.onText(/\/help/, (msg) => {
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, 'You can use the following commands:\n/start - Start the bot\n/help - Get help');
 });
 
-// Export the bot for potential future use in other files
-module.exports = bot;
+

@@ -1,3 +1,3 @@
-require('./bot')
+import './bot.js';
 
 console.log("running");

@@ -1,11 +1,11 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const EmergencySchema = new mongoose.Schema({
   location: {
     type: String,
     required: true,
   },
-  severity: {
+  illness: {
     type: String,
     required: true,
   },
@@ -19,4 +19,5 @@ const EmergencySchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Emergency', EmergencySchema);
+const Emergency = mongoose.model('Emergency', EmergencySchema);
+export default Emergency;

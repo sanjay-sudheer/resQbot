@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const API_KEY = 'c34dae9f3fc6426dbd3ebe6526202158';
-const FILE_URL = 'https://storage.googleapis.com/aai-web-samples/5_common_sports_injuries.mp3';
+
 
 module.exports =  transcribeAudio = async (url) => {
   try {

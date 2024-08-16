@@ -1,10 +1,8 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const connectDB = async () => {
+export const connectDB = async () => {
   try {
-    await mongoose.connect('', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+    await mongoose.connect('mongodb+srv://sanjaysudheer:admin123@resqbot.rk4ih.mongodb.net/?retryWrites=true&w=majority&appName=resQbot', {
     });
     console.log('MongoDB connected...');
   } catch (err) {
@@ -12,5 +10,3 @@ const connectDB = async () => {
     process.exit(1); 
   }
 };
-
-module.exports = connectDB;
