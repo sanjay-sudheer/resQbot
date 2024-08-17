@@ -6,34 +6,40 @@ import Emergency from "./emergency.js";
 
 
 
-const saveEmergencyData = async (data) => {
+const saveEmergencyData = async (data, latitude, longitude) => {
   try {
-    const emergency = new Emergency(data);
+    const emergencyData = {
+      ...data,
+      latitude: latitude,
+      longitude: longitude
+    };
+    const emergency = new Emergency(emergencyData);
     await emergency.save();
+
     console.log('Emergency data saved:', emergency);
   } catch (err) {
-    console.error(err.message);
+    console.error('Error saving emergency data:', err.message);
   }
 };
 
 
-export const handleEmergency = async (transcription) => {
+
+export const handleEmergency = async (transcription,latitude,longitude) => {
   connectDB();
   const prompt = `
-  Extract the location(place), illness, and priority(low,medium,high) from the following transcription and return it stricty in JSON format as plain text:
+  You are a helpful assistant. Extract the problem, including the place or location if mentioned, and the priority (low, medium, high) based on the threat to human life from the following transcription. Return the extracted information strictly in JSON format as plain text:
   "${transcription}"
   
   Format:
   {
-    "location": "",
-    "illness": "",
+    "problem": "",
     "priority": ""
   }
   `;
 
   const result = await model.generateContent(prompt);
   const cleanedRes = result.response.text().replace(/```json|```/g, '').trim();
-  await saveEmergencyData(JSON.parse(cleanedRes));
+  await saveEmergencyData(JSON.parse(cleanedRes),latitude,longitude);
   console.log(JSON.parse(cleanedRes));
 }
 

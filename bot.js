@@ -2,11 +2,11 @@ import TelegramBot from 'node-telegram-bot-api';
 import stt from './model/stt.cjs';
 import { handleEmergency } from './model/genai.js';
 
-// Replace with your own Telegram bot token
 const token = '7243620292:AAFb8L_bsQLPCOR1WM_c3rfaKJ2Gy6L6v9U';
 
-// Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(token, { polling: true });
+
+const userLocations = new Map();
 
 const sendWelcomeMessage = (chatId, userName) => {
     const welcomeMessage = `Welcome, ${userName}! This is the Emergency Service Dispatch Bot. 
@@ -22,33 +22,55 @@ const sendWelcomeMessage = (chatId, userName) => {
     bot.sendMessage(chatId, welcomeMessage, options);
 };
 
+const askForVoiceMessage = (chatId) => {
+    const message = `Thank you for providing your location. Please send a voice message describing the emergency.`;
+
+    bot.sendMessage(chatId, message);
+};
+
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
     const userName = msg.from.first_name || 'User';
     sendWelcomeMessage(chatId, userName);
 });
 
+bot.on('location', async (msg) => {
+    const chatId = msg.chat.id;
+    const { latitude, longitude } = msg.location;
+
+    userLocations.set(chatId, { latitude, longitude });
+
+    console.log(`Received location: Latitude ${latitude}, Longitude ${longitude}`);
+
+    bot.sendMessage(chatId, 'Location received. Our team is on the way to assist you.');
+    
+    askForVoiceMessage(chatId);
+});
+
 bot.on('voice', async (msg) => {
     const chatId = msg.chat.id;
 
-    // Get the file ID of the voice note
+
+    const location = userLocations.get(chatId);
+    if (!location) {
+        bot.sendMessage(chatId, 'Please share your location first.');
+        return;
+    }
+
+    const { latitude, longitude } = location;
+
+ 
     const fileId = msg.voice.file_id;
 
     try {
-        // Get the file path
         const file = await bot.getFile(fileId);
         const filePath = file.file_path;
 
-        // Download the file
         const url = `https://api.telegram.org/file/bot${token}/${filePath}`;
        
         const text = await stt(url);
-        await handleEmergency(text);
-
-        // Respond to the user
+        await handleEmergency(text, latitude, longitude);
         bot.sendMessage(chatId, 'Voice note received. Our team is reviewing your emergency.');
-
-        // Here you can add code to transcribe the voice note or take further action
 
     } catch (error) {
         console.error('Error handling voice note:', error);
@@ -56,20 +78,7 @@ bot.on('voice', async (msg) => {
     }
 });
 
-
-bot.on('location', async (msg) => {
-    const chatId = msg.chat.id;
-    const { latitude, longitude } = msg.location;
-
-    // Handle the location data
-    console.log(`Received location: Latitude ${latitude}, Longitude ${longitude}`);
-
-    bot.sendMessage(chatId, 'Location received. Our team is on the way to assist you.');
-});
-
 bot.onText(/\/help/, (msg) => {
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, 'You can use the following commands:\n/start - Start the bot\n/help - Get help');
 });
-
-

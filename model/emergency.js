@@ -1,11 +1,15 @@
 import mongoose from 'mongoose';
 
 const EmergencySchema = new mongoose.Schema({
-  location: {
-    type: String,
+  latitude: {
+    type: Number,
     required: true,
   },
-  illness: {
+  longitude: {
+    type: Number,
+    required: true,
+  },
+  problem: {
     type: String,
     required: true,
   },
