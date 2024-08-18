@@ -1,6 +1,8 @@
 const axios = require('axios');
+require('dotenv').config();
 
-const API_KEY = 'c34dae9f3fc6426dbd3ebe6526202158';
+
+const API_KEY = process.env.AAI_KEY;
 
 
 module.exports =  transcribeAudio = async (url) => {

@@ -1,8 +1,12 @@
 import TelegramBot from 'node-telegram-bot-api';
 import stt from './model/stt.cjs';
 import { handleEmergency } from './model/genai.js';
+import dotenv from 'dotenv';
 
-const token = '7243620292:AAFb8L_bsQLPCOR1WM_c3rfaKJ2Gy6L6v9U';
+dotenv.config();
+
+
+const token = process.env.BOT_TOKEN;
 
 const bot = new TelegramBot(token, { polling: true });
 
