@@ -1,9 +1,8 @@
-const express = require('express');
+import express from 'express';
+import {getAllEmergencies} from '../controller/admin.js';
 
 const router = express.Router();
 
-const adminController = require('../controllers/admin');
+router.get('/getAllEmergencies', getAllEmergencies);
 
-router.get('/dashboard', adminController.getDashboard);
-
-module.exports = router;
+export default router;

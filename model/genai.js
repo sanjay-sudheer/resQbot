@@ -31,7 +31,7 @@ const saveEmergencyData = async (data, latitude, longitude) => {
 export const handleEmergency = async (transcription,latitude,longitude) => {
   connectDB();
   const prompt = `
-  You are a helpful assistant. Extract the problem, including the place or location if mentioned, and the priority (low, medium, high) based on the threat to human life from the following transcription. Return the extracted information strictly in JSON format as plain text:
+  You are a helpful assistant. Extract the problem, including the place or location if mentioned, and the priority (low, medium, high (set the only in full lowercased letters)) based on the threat to human life, women safety, child harassment. Also consider setting medium priority in a sensible manner, from the following transcription. Return the extracted information strictly in JSON format as plain text:
   "${transcription}"
   
   Format:

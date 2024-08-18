@@ -1,6 +1,42 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const Dashboard = () => {
+  const [emergencies, setEmergencies] = useState([]);
+  const [counts, setCounts] = useState({
+    totalProblems: 0,
+    highSeverity: 0,
+    mediumSeverity: 0,
+    lowSeverity: 0,
+  });
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/admin/getAllEmergencies")
+      .then((response) => {
+        const data = response.data.data;
+        setEmergencies(data);
+
+        // Calculate counts
+        const totalProblems = data.length;
+        const highSeverity = data.filter((e) => e.priority === "high").length;
+        const mediumSeverity = data.filter((e) => e.priority === "medium").length;
+        const lowSeverity = data.filter((e) => e.priority === "low").length;
+
+        setCounts({
+          totalProblems,
+          highSeverity,
+          mediumSeverity,
+          lowSeverity,
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, []);
+
   return (
     <div className="flex h-screen w-full flex-col bg-gray-100">
       <header className="bg-blue-600 text-white flex h-16 items-center px-6 shadow-md">
@@ -40,10 +76,10 @@ const Dashboard = () => {
           <div className="grid gap-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { title: "Total Problems", count: 10, color: "bg-blue-500", icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" },
-                { title: "High Severity", count: 4, color: "bg-red-500", icon: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" },
-                { title: "Medium Severity", count: 3, color: "bg-yellow-500", icon: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" },
-                { title: "Low Severity", count: 3, color: "bg-green-500", icon: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
+                { title: "Total Problems", count: counts.totalProblems, color: "bg-blue-500", icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" },
+                { title: "High Severity", count: counts.highSeverity, color: "bg-red-500", icon: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" },
+                { title: "Medium Severity", count: counts.mediumSeverity, color: "bg-yellow-500", icon: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" },
+                { title: "Low Severity", count: counts.lowSeverity, color: "bg-green-500", icon: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
               ].map((stat) => (
                 <div
                   key={stat.title}
@@ -92,66 +128,29 @@ const Dashboard = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {[
-                          {
-                            problem: "Broken street sign on Pine Road",
-                            severity: "low",
-                            latitude: "40.730987",
-                            longitude: "-73.974321",
-                          },
-                          {
-                            problem: "Broken streetlight on Oak Avenue",
-                            severity: "medium",
-                            latitude: "40.718291",
-                            longitude: "-74.007846",
-                          },
-                          {
-                            problem: "Broken traffic signal at Oak and Maple",
-                            severity: "high",
-                            latitude: "40.722456",
-                            longitude: "-73.998741",
-                          },
-                          {
-                            problem: "Cracked pavement on Ash Avenue",
-                            severity: "high",
-                            latitude: "40.741234",
-                            longitude: "-73.987654",
-                          },
-                          {
-                            problem: "Damaged fence on Cedar Street",
-                            severity: "medium",
-                            latitude: "40.726789",
-                            longitude: "-73.962134",
-                          },
-                          {
-                            problem: "Damaged sidewalk on Birch Road",
-                            severity: "high",
-                            latitude: "40.753567",
-                            longitude: "-73.971234",
-                          },
-                        ].map((problem) => (
+                        {emergencies.map((problem) => (
                           <tr key={problem.problem} className="bg-white border-b hover:bg-gray-50">
                             <td className="px-6 py-4 font-medium text-gray-900">{problem.problem}</td>
                             <td className="px-6 py-4">
                               <span
                                 className={`px-2 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full ${
-                                  problem.severity === "high"
+                                  problem.priority === "high"
                                     ? "bg-red-100 text-red-800"
-                                    : problem.severity === "medium"
+                                    : problem.priority === "medium"
                                     ? "bg-yellow-100 text-yellow-800"
                                     : "bg-green-100 text-green-800"
                                 }`}
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={
-                                    problem.severity === "high"
+                                    problem.priority === "high"
                                       ? "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                      : problem.severity === "medium"
+                                      : problem.priority === "medium"
                                       ? "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                                       : "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                   } />
                                 </svg>
-                                {problem.severity}
+                                {problem.priority}
                               </span>
                             </td>
                             <td className="px-6 py-4">{problem.latitude}</td>
