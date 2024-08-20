@@ -14,7 +14,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     axios
-      .get("https://resqbot.onrender.com/admin/getAllEmergencies")
+      .get("https://resqbot-production.up.railway.app/admin/getAllEmergencies")
       .then((response) => {
         const data = response.data.data;
         setEmergencies(data);
